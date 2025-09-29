@@ -5,7 +5,7 @@ return (
 <>
 <div className="navbar-container">
 	{/* Custom Logo */}
-	<img src="/src/assets/Logo.png" alt="Logo" className="navbar-logo" />
+	<img src="Logo.png" alt="Logo" className="navbar-logo" />
 	<h1 className="navbar-title">My Portfolio</h1>
 </div>
 <nav className="navbar-links">
