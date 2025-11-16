@@ -5,14 +5,23 @@ import config from "./../../config/config.js";
 const signin = async (req, res) => {
   try {
     let user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status("401").json({ error: "User not found" });
+    if (!user) return res.status(401).json({ error: "User not found" });
     if (!user.authenticate(req.body.password)) {
       return res
-        .status("401")
+        .status(401)
         .send({ error: "Email and password don't match." });
     }
-    const token = jwt.sign({ _id: user._id }, config.jwtSecret);
-    res.cookie("t", token, { expire: new Date() + 9999 });
+    // create a signed JWT that expires in 1 day
+    const token = jwt.sign({ _id: user._id }, config.jwtSecret, {
+      expiresIn: "1d",
+    });
+    // set cookie with proper options (use `expires` or `maxAge`, not `expire`)
+    res.cookie("t", token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+    });
     return res.json({
       token,
       user: {
@@ -22,7 +31,7 @@ const signin = async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status("401").json({ error: "Could not sign in" });
+    return res.status(401).json({ error: "Could not sign in" });
   }
 };
 const signout = (req, res) => {
@@ -43,9 +52,13 @@ const requireSignin = expressjwt({
 });
 
 const hasAuthorization = (req, res, next) => {
-  const authorized = req.profile && req.auth && req.profile._id == req.auth._id;
+  // compare IDs as strings to avoid ObjectId vs string mismatch
+  const authorized =
+    req.profile &&
+    req.auth &&
+    String(req.profile._id) === String(req.auth._id);
   if (!authorized) {
-    return res.status("403").json({
+    return res.status(403).json({
       error: "User is not authorized",
     });
   }

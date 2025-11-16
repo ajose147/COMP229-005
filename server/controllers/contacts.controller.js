@@ -1,46 +1,67 @@
 import Contact from "../models/contacts.model.js";
+import errorHandler from "./error.controller.js";
 
 const create = async (req, res) => {
+  const contact = new Contact(req.body);
   try {
-    const contact = new Contact(req.body);
-    const saved = await contact.save();
-    return res.status(201).json(saved);
+    await contact.save();
+    res.json(contact);
   } catch (err) {
-    console.error(err);
-    return res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
 };
 
 const list = async (req, res) => {
   try {
-    const contacts = await Contact.find().sort({ createdAt: -1 });
-    return res.json(contacts);
+    const contacts = await Contact.find();
+    res.json(contacts);
   } catch (err) {
-    console.error(err);
-    return res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
 };
 
-const read = async (req, res) => {
+const contactByID = async (req, res, next, id) => {
   try {
-    const contact = await Contact.findById(req.params.contactId);
+    const contact = await Contact.findById(id);
     if (!contact) return res.status(404).json({ error: "Contact not found" });
-    return res.json(contact);
+    req.contact = contact;
+    next();
   } catch (err) {
-    console.error(err);
-    return res.status(400).json({ error: "Invalid contact id" });
+    return res.status(400).json({ error: "Could not retrieve contact" });
+  }
+};
+
+const read = (req, res) => {
+  return res.json(req.contact);
+};
+
+const update = async (req, res) => {
+  try {
+    let contact = req.contact;
+    contact = Object.assign(contact, req.body);
+    await contact.save();
+    res.json(contact);
+  } catch (err) {
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
 };
 
 const remove = async (req, res) => {
   try {
-    const removed = await Contact.findByIdAndDelete(req.params.contactId);
-    if (!removed) return res.status(404).json({ error: "Contact not found" });
-    return res.json({ message: "Contact deleted" });
+    await req.contact.deleteOne();
+    res.json({ message: "Contact deleted" });
   } catch (err) {
-    console.error(err);
-    return res.status(400).json({ error: "Invalid contact id" });
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
   }
 };
 
-export default { create, list, read, remove };
+const removeAll = async (req, res) => {
+  try {
+    await Contact.deleteMany({});
+    res.json({ message: "All contacts removed" });
+  } catch (err) {
+    return res.status(400).json({ error: errorHandler.getErrorMessage(err) });
+  }
+};
+
+export default { create, list, contactByID, read, update, remove, removeAll };

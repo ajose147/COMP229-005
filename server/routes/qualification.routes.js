@@ -1,19 +1,16 @@
-// In server/routes/qualification.routes.js
-import express from 'express'
-import qualificationCtrl from '../controllers/qualification.controller.js'
-import authCtrl from '../controllers/auth.controller.js' // 1. Import auth
+import express from "express";
+import qualCtrl from "../controllers/qualifications.controller.js";
+const router = express.Router();
 
-const router = express.Router()
+router.route("/api/qualifications").post(qualCtrl.create);
+router.route("/api/qualifications").get(qualCtrl.list);
+router.route("/api/qualifications").delete(qualCtrl.removeAll);
+router
+  .route("/api/qualifications/:qualificationId")
+  .get(qualCtrl.read)
+  .put(qualCtrl.update)
+  .delete(qualCtrl.remove);
 
-router.route('/api/qualifications')
-  .get(qualificationCtrl.list)
-  .post(authCtrl.requireSignin, qualificationCtrl.create) // 2. Protected
-  .delete(authCtrl.requireSignin, qualificationCtrl.removeAll) // 2. Protected
+router.param("qualificationId", qualCtrl.qualificationByID);
 
-router.route('/api/qualifications/:qualificationId')
-  .get(qualificationCtrl.read)
-  .put(authCtrl.requireSignin, qualificationCtrl.update) // 2. Protected
-  .delete(authCtrl.requireSignin, qualificationCtrl.remove) // 2. Protected
-
-router.param('qualificationId', qualificationCtrl.qualificationByID)
-export default router
+export default router;

@@ -3,11 +3,12 @@ import app from "./server/express.js";
 import mongoose from "mongoose";
 mongoose.Promise = global.Promise;
 mongoose
+
   .connect(config.mongoUri, {
+    dbName: process.env.MONGO_DB_NAME || 'Portfolio',
     //useNewUrlParser: true,
     //useCreateIndex: true,
     //useUnifiedTopology: true
-    dbName: "Skeleton"
   })
   .then(() => {
     console.log("Connected to the database!");

@@ -6,24 +6,27 @@ import cors from "cors";
 import helmet from "helmet";
 import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
-import contactsRoutes from "./routes/contacts.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
+import projectRoutes from "./routes/project.routes.js";
+import qualificationRoutes from "./routes/qualification.routes.js";
 
 const app = express();
-
-// Security and parsing middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// parsing, cookies and security middleware should be applied before routes
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compress());
 app.use(helmet());
 app.use(cors());
 
-// Routes
+// register routes after middleware
 app.use("/", userRoutes);
 app.use("/", authRoutes);
-app.use("/", contactsRoutes);
+app.use("/", contactRoutes);
+app.use("/", projectRoutes);
+app.use("/", qualificationRoutes);
 app.use((err, req, res, next) => {
   if (err.name === "UnauthorizedError") {
     res.status(401).json({ error: err.name + ": " + err.message });
