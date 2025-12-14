@@ -3,7 +3,7 @@ export default function About() {
 	return (
 		<div className="about-page">
 			{/*Placeholder image for your photo */}
-			<h2>About Me!</h2>
+			<h2>About Me</h2>
 			<img src="Headshot.jpg" alt="Headshot" className="about-photo" />
 			{/*Your legal name */}
 			<h3>Alex Joseph</h3>
