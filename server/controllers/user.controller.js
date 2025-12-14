@@ -3,7 +3,9 @@ import errorHandler from '../helpers/dbErrorHandler.js'
 
 // Create new user
 const create = async (req, res) => {
-  const user = new User(req.body)
+  const user = new User(req.body);
+  // force role to 'user' on public signup to prevent privilege escalation
+  user.role = 'user';
   try {
     await user.save()
     return res.status(200).json({ message: "User added successfully!" })

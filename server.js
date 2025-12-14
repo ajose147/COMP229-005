@@ -1,28 +1,24 @@
+// server/server.js
+import mongoose from "mongoose";
 import config from "./config/config.js";
 import app from "./server/express.js";
-import mongoose from "mongoose";
-mongoose.Promise = global.Promise;
-mongoose
 
+mongoose.Promise = global.Promise;
+
+mongoose
   .connect(config.mongoUri, {
-    dbName: process.env.MONGO_DB_NAME || 'Portfolio',
-    //useNewUrlParser: true,
-    //useCreateIndex: true,
-    //useUnifiedTopology: true
+    dbName: "Portfolio",
   })
   .then(() => {
-    console.log("Connected to the database!");
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err.message);
   });
 
-mongoose.connection.on("error", () => {
-  throw new Error(`unable to connect to database: ${config.mongoUri}`);
-});
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to User application." });
-});
 app.listen(config.port, (err) => {
   if (err) {
-    console.log(err);
+    console.error(err);
   }
-  console.info("Server started on port %s.", config.port);
+  console.log(`Server running on port ${config.port}`);
 });

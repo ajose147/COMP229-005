@@ -165,26 +165,58 @@
 .service-item h3 {
 	margin: 0.5rem 0;
 }
-/*Navigation Bar and Logo Styles */
+/* Navigation Bar and Logo Styles */
+header.navbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem 1.25rem;
+	max-width: 980px;
+	margin: 0 auto 1rem;
+	box-sizing: border-box;
+}
+
+.navbar-brand {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: inherit;
+}
+
+.nav-links {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+/* Simple navbar structure used by `components/Layout.jsx` */
 .navbar-container {
 	display: flex;
 	align-items: center;
-	gap: 1rem;
+	gap: 12px;
 }
-
 .navbar-logo {
-	width: 50px;
-	height: 50px;
+	width: 64px;
+	height: auto;
+	max-width: 80px;
+	display: block;
 }
-
 .navbar-title {
+	font-size: 1.25rem;
 	margin: 0;
 }
 
-.navbar-links {
-	margin-top: 1rem;
-	font-size: x-large;
-	float: right;
+.nav-links .nav-link {
+	color: inherit;
+	text-decoration: none;
+	padding: 0.4rem 0.7rem;
+	border-radius: 6px;
+	font-weight: 500;
+}
+
+.nav-links .nav-link.active,
+.nav-links .nav-link:hover {
+	background: rgba(100,108,255,0.08);
+	color: #646cff;
 }
 :root {
 font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -252,9 +284,8 @@ background-color: #f9f9f9;
 }
 }
 
+/* fallback nav spacing (unused by components but left for compatibility) */
 nav {
-float:right;
-font-size:x-large;
-
+	float: none;
 }
 

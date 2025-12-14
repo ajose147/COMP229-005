@@ -1,15 +1,17 @@
 import express from "express";
-import projectCtrl from "../controllers/projects.controller.js";
+import projectCtrl from "../controllers/project.controller.js";
+import authCtrl from "../controllers/auth.controller.js";
 const router = express.Router();
 
-router.route("/api/projects").post(projectCtrl.create);
+// Public reads
 router.route("/api/projects").get(projectCtrl.list);
-router.route("/api/projects").delete(projectCtrl.removeAll);
-router
-  .route("/api/projects/:projectId")
-  .get(projectCtrl.read)
-  .put(projectCtrl.update)
-  .delete(projectCtrl.remove);
+router.route("/api/projects/:projectId").get(projectCtrl.read);
+
+// Admin write routes
+router.route("/api/projects").post(authCtrl.requireSignin, authCtrl.isAdmin, projectCtrl.create);
+router.route("/api/projects").delete(authCtrl.requireSignin, authCtrl.isAdmin, projectCtrl.removeAll);
+router.route("/api/projects/:projectId").put(authCtrl.requireSignin, authCtrl.isAdmin, projectCtrl.update);
+router.route("/api/projects/:projectId").delete(authCtrl.requireSignin, authCtrl.isAdmin, projectCtrl.remove);
 
 router.param("projectId", projectCtrl.projectByID);
 

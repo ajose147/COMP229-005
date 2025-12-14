@@ -4,6 +4,9 @@ import { expressjwt } from "express-jwt";
 import config from "./../../config/config.js";
 const signin = async (req, res) => {
   try {
+    console.log('Auth.signin called:', { method: req.method, url: req.originalUrl });
+    console.log('Auth.signin headers:', req.headers);
+    console.log('Auth.signin body (parsed):', req.body);
     let user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(401).json({ error: "User not found" });
     if (!user.authenticate(req.body.password)) {
@@ -11,8 +14,8 @@ const signin = async (req, res) => {
         .status(401)
         .send({ error: "Email and password don't match." });
     }
-    // create a signed JWT that expires in 1 day
-    const token = jwt.sign({ _id: user._id }, config.jwtSecret, {
+    // create a signed JWT that expires in 1 day and include role
+    const token = jwt.sign({ _id: user._id, role: user.role }, config.jwtSecret, {
       expiresIn: "1d",
     });
     // set cookie with proper options (use `expires` or `maxAge`, not `expire`)
@@ -28,9 +31,11 @@ const signin = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (err) {
+    console.error('Auth.signin error:', err && err.message ? err.message : err);
     return res.status(401).json({ error: "Could not sign in" });
   }
 };
@@ -49,6 +54,18 @@ const requireSignin = expressjwt({
   secret: config.jwtSecret,
   algorithms: ["HS256"],
   userProperty: "auth",
+  // allow token in Authorization header (Bearer ...) or in cookie named 't'
+  getToken: (req) => {
+    if (!req) return null;
+    // Check Authorization header
+    if (req.headers && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2 && parts[0] === 'Bearer') return parts[1];
+    }
+    // Fallback to cookie 't'
+    if (req.cookies && req.cookies.t) return req.cookies.t;
+    return null;
+  },
 });
 
 const hasAuthorization = (req, res, next) => {
@@ -65,4 +82,13 @@ const hasAuthorization = (req, res, next) => {
   next();
 };
 
-export default { signin, signout, requireSignin, hasAuthorization };
+const isAdmin = (req, res, next) => {
+  console.log('Auth.isAdmin check, req.auth:', req.auth);
+  // requireSignin should populate req.auth with token payload
+  if (req.auth && req.auth.role && req.auth.role === "admin") {
+    return next();
+  }
+  return res.status(403).json({ error: "Admin resource. Access denied." });
+};
+
+export default { signin, signout, requireSignin, hasAuthorization, isAdmin };
